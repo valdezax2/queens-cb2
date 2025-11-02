@@ -190,6 +190,6 @@ Want to see your name here? Contribute to the project!
 
 ## License
 
-This project is licensed under the MIT License — see `LICENSE`.
+This project is licensed under the Apache-2.0 license — see `LICENSE`.
 
 
