@@ -1,200 +1,48 @@
-# 🏙️ Queens Community Board 2 - Link Verification Tool
+# queens-cb2
 
-Welcome to the Queens Community Board 2 repository! This project helps CB2 members ensure that all links on the Queens CB2 website are active and working correctly.
+Monorepo for projects that support Queens Community Board 2. This root README is a landing page: it explains setup and lists projects. Each project has its own README with details and run instructions.
 
----
+## Quick start
 
-## 📋 About This Project
+- Requirements: Python 3.10+ (see `requirements.txt`)
+- Install dependencies once:
 
-The **Link Verification Tool** is a community-driven project designed to:
-- ✅ Automatically scan the Queens CB2 website for all links
-- ✅ Verify that each link is active and accessible
-- ✅ Create a report of working and broken links
-- ✅ Upload verified data to a central server for tracking
+  ```bash
+  pip install -r requirements.txt
+  ```
 
-This tool helps **CB2 members and constituents** maintain the quality and reliability of the community board's web presence.
+- Go to a project folder and follow its README.
 
----
+## Projects
 
-## 🎯 How It Works
+| Project | Path | Description | Docs |
+| --- | --- | --- | --- |
+| Homepage • Link Grabber | `homepage/link_grabber/` | Scrapes homepage links, verifies status, and supports CSV upload. | [README](homepage/link_grabber/README.md) |
 
-The tool follows a **3-step pipeline**:
+Add new projects as rows in this table and include a per-project README.
 
-### Step 1️⃣: Link Scraper
-Automatically discovers all links on the Queens CB2 website pages and saves them to a CSV file.
-
-**Input**: Queens CB2 website URLs  
-**Output**: `links_table.csv` (list of all links found)
-
-### Step 2️⃣: Link Verifier
-Tests each discovered link to check if it's still active and accessible.
-
-**Input**: `links_table.csv`  
-**Output**: `links_table_with_status.csv` (links with status: ✅ Active or ❌ Broken)
-
-### Step 3️⃣: Data Uploader
-Sends the verified link data to a central server for storage and tracking.
-
-**Input**: `links_table_with_status.csv`  
-**Output**: HTTP confirmation to server
-
----
-
-## 📊 Process Flow
-
-### Step 1: Link Scraper
-```mermaid
-flowchart TD
-    Start([Start]) --> Import[Import Dependencies:<br/>requests, BeautifulSoup,<br/>urljoin, csv]
-    Import --> DefinePages[Define pages list<br/>5 NYC.gov URLs]
-    DefinePages --> InitRows[Initialize empty rows list]
-    InitRows --> LoopStart{For each page<br/>in pages}
-    
-    LoopStart -->|Next page| TryFetch[Try: Fetch page<br/>with requests.get]
-    TryFetch -->|Exception| PrintError[Print error message]
-    PrintError --> LoopStart
-    
-    TryFetch -->|Success| ParseHTML[Parse HTML with<br/>BeautifulSoup]
-    ParseHTML --> FindAnchors[Find all anchor tags<br/>with href attribute]
-    FindAnchors --> InnerLoop{For each<br/>anchor tag}
-    
-    InnerLoop -->|Next anchor| ExtractHref[Extract href and<br/>convert to absolute URL]
-    ExtractHref --> GetText[Get link text<br/>or use URL as fallback]
-    GetText --> AppendRow[Append tuple to rows:<br/>page, text, full_url]
-    AppendRow --> InnerLoop
-    
-    InnerLoop -->|Done| LoopStart
-    LoopStart -->|Done| WriteCSV[Write CSV file<br/>to links_table.csv]
-    WriteCSV --> PrintConfirm[Print confirmation<br/>messages]
-    PrintConfirm --> End([End])
-```
-
-### Step 2: Link Verifier
-```mermaid
-flowchart TD
-    Start([START]) --> Import["Import Libraries & Define Paths"]
-    Import --> ReadCSV["Read CSV File with Links"]
-    ReadCSV --> CreateSession["Create HTTP Session"]
-    CreateSession --> ForEach["For Each Link in CSV"]
-    ForEach --> TryHEAD["Try HEAD Request"]
-    TryHEAD -->|"Success (Status < 400)"| MarkYes1["Mark as 'Yes'"]
-    TryHEAD -->|Fail| TryGET["Try GET Request"]
-    TryGET -->|Success| MarkYes1
-    TryGET -->|Fail| RetryGET["Retry with GET"]
-    RetryGET -->|Success| MarkYes1
-    RetryGET -->|Fail| MarkNo["Mark as 'No'"]
-    MarkYes1 --> Store["Store Result in List"]
-    MarkNo --> Store
-    Store --> RateLimit["Rate Limiting: Sleep after every 50 requests"]
-    RateLimit --> MoreLinks{"More Links?"}
-    MoreLinks -->|Yes| ForEach
-    MoreLinks -->|No| WriteCSV["Write Results to CSV File"]
-    WriteCSV --> PrintMsg["Print Completion Message"]
-    PrintMsg --> End([END])
-```
-
----
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- Python 3.7+
-- Python packages listed in `requirements.txt`
-
-### Installation
-
-1. **Clone this repository**
-   ```bash
-   git clone https://github.com/valdezax2/queens-cb2.git
-   cd queens-cb2
-   ```
-
-2. **Install required packages**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   Optional (for running notebooks):
-   ```bash
-   pip install notebook
-   ```
-
-3. **Navigate to the tool directory**
-   ```bash
-   cd homepage/link_grabber
-   ```
-
-### Running the Tool
-
-#### Option 1: Full Automated Run
-```bash
-./test_uploader.sh
-```
-This runs all 3 steps with automatic testing.
-
-#### Option 2: Step-by-Step with Jupyter Notebooks
-1. Open `01. all_link_grabber.ipynb` → Run all cells
-2. Open `02. link_verify.ipynb` → Run all cells
-3. Open `03_csv_uploader.ipynb` → Run all cells
-
-#### Option 3: Individual Python Scripts
-```bash
-# Step 1: Scrape links
-jupyter nbconvert --to script "01. all_link_grabber.ipynb"
-python3 "01. all_link_grabber.py"
-
-# Step 2: Verify links
-jupyter nbconvert --to script "02. link_verify.ipynb"
-python3 "02. link_verify.py"
-
-# Step 3: Upload data (optional-advanced)
-# Don't use this script unless you have programming experience
-# You will need to edit the file to secure the server/client communication
-python3 03_csv_uploader.py
-
+## Repository layout
 
 ```
-
----
-
-## 📁 Project Structure
-
-```
-queens-cb2/
-├── README.md (this file)
-├── requirements.txt                # Python dependencies
+.
 ├── LICENSE
-├── flow_chart/                     # Process diagrams
-│   ├── 01.1 flow-chart.md         # Link Scraper flowchart
-│   └── 02.1 flow-chart.md         # Link Verifier flowchart
-│
-└── homepage/link_grabber/
-    ├── 01. all_link_grabber.ipynb       # Step 1: Scrape links
-    ├── 02. link_verify.ipynb            # Step 2: Verify links
-    ├── 03_csv_uploader.py               # Step 3: Upload data (Python)
-    ├── 03_csv_uploader.ipynb            # Step 3: Upload data (Notebook)
-    ├── test_uploader.sh                 # Automated test harness
-    ├── README_UPLOADER.md               # Detailed documentation
-    ├── START_HERE.md                    # Quick reference
-    ├── COMPLETION_REPORT.md             # Technical summary
-    ├── links_table.csv                  # Output: All links
-    ├── links_table_with_status.csv      # Output: Links with status
-    └── main.py                          # Utility script
+├── README.md             # You are here
+├── requirements.txt
+└── homepage/
+    └── link_grabber/
+        ├── 01. all_link_grabber.ipynb
+        ├── 02. link_verify.ipynb
+        ├── 03_csv_uploader.py
+        ├── 03_csv_uploader.ipynb (optional)
+        ├── README_UPLOADER.md
+        ├── START_HERE.md
+        ├── COMPLETION_REPORT.md
+        ├── links_table.csv
+        ├── links_table_with_status.csv
+        └── flow_chart/
+            ├── 01.1 flow-chart.md
+            └── 02.1 flow-chart.md
 ```
-
----
-
-## 📊 Output Files
-
-After running the tool, you'll have:
-
-1. **`links_table.csv`**
-   - Contains all discovered links from the Queens CB2 website
-   - Columns: Source Page, Link Text, Link URL
-
-2. **`links_table_with_status.csv`**
-   - All links with their status (Active ✅ or Broken ❌)
-   - Columns: Source Page, Link Text, Link URL, Alive (Yes/No)
 
 ---
 
@@ -300,23 +148,20 @@ Found a problem? Help us fix it!
 
 ## ❓ FAQ
 
-**Q: Do I need to be a programmer to use this?**  
-A: No! You can run it using the automated test harness or Jupyter notebooks without writing any code.
+**Q: Who is this project for?**  
+A: Anyone in the Queens CB2 district who wants to suggest improvements, and current or future Board Members who want to use, adapt, or extend the tools for their workflows. All skill levels welcome.
 
-**Q: How often should I run this tool?**  
-A: We recommend running it monthly to catch broken links early. You can automate it with a cron job.
+**Q: How can I share suggestions or ideas without coding?**  
+A: Open an Issue with the “suggestion” label and include:
+- The page(s) or link(s) you’re referring to
+- The problem or idea and why it helps CB2
+- Any screenshots or files that help explain it
 
-**Q: What if a link is temporarily down?**  
-A: The tool marks it as broken. Check again later or investigate manually if it's an important link.
+You can also help by testing results and giving feedback on proposed changes.
 
-**Q: Can I modify the URLs being scanned?**  
-A: Yes! Edit the pages list in `01. all_link_grabber.ipynb` to add or remove URLs.
+**Q: Do I need to be a programmer to contribute?**  
+A: No. You can participate by filing suggestions, verifying links, running notebooks step-by-step, or improving docs. Code changes are optional and guided by each project’s README.
 
-**Q: How do I report a broken link on the website?**  
-A: Check `links_table_with_status.csv` for broken links and submit them as an Issue on this repository.
-
-**Q: Can this tool work with other websites?**  
-A: Yes! Modify the `pages` list in Step 1 to scan different websites.
 
 ---
 
@@ -326,12 +171,6 @@ A: Yes! Modify the `pages` list in Step 1 to scan different websites.
 - **Want to contribute?** See the Contributing section above
 - **Found a bug?** Please report it with as much detail as possible
 - **Have ideas?** We'd love to hear them! Create an Issue to discuss
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -347,4 +186,10 @@ Want to see your name here? Contribute to the project!
 **Last Updated**: November 2, 2025
 
 🙏 Thank you for supporting Queens Community Board 2!
+
+
+## License
+
+This project is licensed under the MIT License — see `LICENSE`.
+
 
