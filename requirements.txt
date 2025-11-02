@@ -1,0 +1,4 @@
+# Project dependencies for queens-cb2
+# Pin to stable major versions used widely; adjust if your environment needs different versions.
+requests>=2.31.0,<3.0.0
+beautifulsoup4>=4.12.0,<5.0.0
