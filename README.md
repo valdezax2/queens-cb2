@@ -1,4 +1,4 @@
-# queens-cb2
+# 🏙️ Queens Community Board 2
 
 Monorepo for projects that support Queens Community Board 2. This root README is a landing page: it explains setup and lists projects. Each project has its own README with details and run instructions.
 
